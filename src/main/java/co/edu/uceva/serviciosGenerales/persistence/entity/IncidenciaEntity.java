@@ -18,6 +18,10 @@ public class IncidenciaEntity {
     @JoinColumn(name = "usuario_id", nullable = false)
     private UsuarioEntity usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "area_fisica_id", nullable = false)
+    private AreaFisicaEntity areaFisica;
+
     @Column(name = "descripcion", nullable = false, columnDefinition = "TEXT")
     private String descripcion;
 
@@ -26,10 +30,7 @@ public class IncidenciaEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, columnDefinition = "ENUM('pendiente', 'en_proceso', 'resuelta')")
-    private EstadoIncidencia estado = EstadoIncidencia.pendiente; // Valor por defecto
-
-    @Column(name = "ubicacion", length = 255)
-    private String ubicacion;
+    private EstadoIncidencia estado = EstadoIncidencia.PENDIENTE;
 
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;

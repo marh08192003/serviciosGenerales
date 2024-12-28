@@ -70,6 +70,18 @@ public class IncidenciaController {
     }
 
     /**
+     * Endpoint para listar incidencias activas por área física.
+     *
+     * @param areaFisicaId ID del área física.
+     * @return Lista de incidencias activas relacionadas con el área física.
+     */
+    @GetMapping("/list/area/{areaFisicaId}")
+    public ResponseEntity<List<IncidenciaDTO>> listarIncidenciasPorAreaFisica(@PathVariable Long areaFisicaId) {
+        List<IncidenciaDTO> incidencias = incidenciaService.listarIncidenciasPorAreaFisica(areaFisicaId);
+        return ResponseEntity.ok(incidencias);
+    }
+
+    /**
      * Endpoint para eliminar (soft delete) una incidencia.
      *
      * @param id ID de la incidencia a eliminar.

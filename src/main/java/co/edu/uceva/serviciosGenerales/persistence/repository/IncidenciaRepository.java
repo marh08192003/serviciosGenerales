@@ -10,4 +10,7 @@ public interface IncidenciaRepository extends JpaRepository<IncidenciaEntity, Lo
     List<IncidenciaEntity> findByActivoTrue();
 
     List<IncidenciaEntity> findByUsuarioIdAndActivoTrue(Long usuarioId);
+
+    List<IncidenciaEntity> findByAreaFisicaIdAndActivoTrue(Long areaFisicaId);
+
 }

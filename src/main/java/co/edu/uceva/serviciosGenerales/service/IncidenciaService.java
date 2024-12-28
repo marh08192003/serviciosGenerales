@@ -15,4 +15,7 @@ public interface IncidenciaService {
     List<IncidenciaDTO> listarIncidenciasActivas();
 
     void eliminarIncidencia(Long id);
+
+    // Nuevo método
+    List<IncidenciaDTO> listarIncidenciasPorAreaFisica(Long areaFisicaId);
 }

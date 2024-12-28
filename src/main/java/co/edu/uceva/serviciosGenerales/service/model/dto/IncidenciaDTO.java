@@ -15,14 +15,15 @@ public class IncidenciaDTO {
     @NotNull(message = "El ID del usuario no puede ser nulo")
     private Long usuarioId;
 
+    @NotNull(message = "El ID del área física no puede ser nulo")
+    private Long areaFisicaId;
+
     @NotBlank(message = "La descripción es obligatoria")
     private String descripcion;
 
     private LocalDateTime fechaReporte;
 
-    private EstadoIncidencia estado;
-
-    private String ubicacion;
+    private EstadoIncidencia estado = EstadoIncidencia.PENDIENTE;
 
     private Boolean activo = true;
 }
