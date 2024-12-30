@@ -48,7 +48,7 @@ public class IncidenciaServiceImpl implements IncidenciaService {
         incidencia.setAreaFisica(areaFisica);
         incidencia.setDescripcion(incidenciaDTO.getDescripcion());
         incidencia
-                .setEstado(incidenciaDTO.getEstado() != null ? incidenciaDTO.getEstado() : EstadoIncidencia.PENDIENTE);
+                .setEstado(incidenciaDTO.getEstado() != null ? incidenciaDTO.getEstado() : EstadoIncidencia.pendiente);
         incidencia.setActivo(true);
 
         IncidenciaEntity savedIncidencia = incidenciaRepository.save(incidencia);

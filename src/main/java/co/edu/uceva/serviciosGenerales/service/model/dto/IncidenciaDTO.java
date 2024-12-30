@@ -23,7 +23,7 @@ public class IncidenciaDTO {
 
     private LocalDateTime fechaReporte;
 
-    private EstadoIncidencia estado = EstadoIncidencia.PENDIENTE;
+    private EstadoIncidencia estado = EstadoIncidencia.pendiente;
 
     private Boolean activo = true;
 }
