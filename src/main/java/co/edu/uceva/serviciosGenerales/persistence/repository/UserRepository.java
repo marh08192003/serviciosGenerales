@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Repository interface for UserEntity. Provides custom methods for retrieving
- * non-deleted users.
+ * non-deleted users. 
  */
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 

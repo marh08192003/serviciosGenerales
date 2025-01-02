@@ -6,10 +6,6 @@ import java.time.LocalDateTime;
 
 /**
  * Entidad que representa un mantenimiento registrado en el sistema.
- * Contiene información sobre el área física, el usuario que programa el
- * mantenimiento,
- * tipo de mantenimiento, fecha de inicio, duración, descripción, prioridad y
- * estado.
  */
 @Data
 @Entity
@@ -24,10 +20,6 @@ public class MaintenanceEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "physical_area_id", nullable = false)
     private PhysicalAreaEntity physicalArea;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
 
     @Column(name = "maintenance_type", nullable = false, length = 100)
     private String maintenanceType;

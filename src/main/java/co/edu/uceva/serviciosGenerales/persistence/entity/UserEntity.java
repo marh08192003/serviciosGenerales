@@ -46,10 +46,4 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<IncidentEntity> reportedIncidents = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<MaintenanceEntity> programmedMaintenances = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<MaintenanceAssignmentEntity> maintenanceAssignments = new ArrayList<>();
 }

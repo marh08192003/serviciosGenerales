@@ -47,4 +47,4 @@ public interface MaintenanceService {
      * @param id ID del mantenimiento a eliminar.
      */
     void deleteMaintenance(Long id);
-}
+} 

@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
 
     private UserEntity mapToEntity(UserDTO dto) {
         UserEntity entity = new UserEntity();
-        entity.setId(dto.getId());
+        entity.setId(dto.getId()); 
         entity.setFirstName(dto.getFirstName());
         entity.setLastName(dto.getLastName());
         entity.setPhone(dto.getPhone());

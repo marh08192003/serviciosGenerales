@@ -26,4 +26,4 @@ public interface MaintenanceRepository extends JpaRepository<MaintenanceEntity, 
      * @return Mantenimiento activo si se encuentra.
      */
     Optional<MaintenanceEntity> findByIdAndActiveTrue(Long id);
-}
+} 

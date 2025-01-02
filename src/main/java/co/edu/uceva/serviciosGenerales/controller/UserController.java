@@ -39,7 +39,7 @@ public class UserController {
         UserDTO createdUser = userService.createUser(userDTO);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
-
+ 
     @PutMapping("/edit/{id}")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,

@@ -26,7 +26,7 @@ public class UserDTO {
     @NotBlank(message = "Institutional email is required")
     @Email(message = "A valid email must be provided")
     private String institutionalEmail;
-
+ 
     @NotBlank(message = "Password is required")
     private String password;
 
