@@ -1,4 +1,5 @@
 package co.edu.uceva.serviciosGenerales.service.impl;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO updateUser(UserDTO userDTO) {
         // To update, allow the user to exist (active or not).
-        // If you want to enforce that the user must be "active" to update, 
+        // If you want to enforce that the user must be "active" to update,
         // use findByIdAndActiveTrue(...) here instead.
         UserEntity existingUser = userRepository.findById(userDTO.getId())
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_MESSAGE));
@@ -85,13 +86,13 @@ public class UserServiceImpl implements UserService {
         userRepository.save(entity);
     }
 
-    // ------------------------------------------------------------------------------------------- 
+    // -------------------------------------------------------------------------------------------
     // Private mapping methods
     // -------------------------------------------------------------------------------------------
 
     private UserEntity mapToEntity(UserDTO dto) {
         UserEntity entity = new UserEntity();
-        entity.setId(dto.getId()); 
+        entity.setId(dto.getId());
         entity.setFirstName(dto.getFirstName());
         entity.setLastName(dto.getLastName());
         entity.setPhone(dto.getPhone());
