@@ -36,7 +36,7 @@ public class JWTUtilityServiceImpl implements IJWTUtilityService {
     private Resource publicKeyResource;
 
     @Override
-    public String generateJWT(Long userId)
+    public String generateJWT(Long userId, String userType)
             throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, JOSEException {
         PrivateKey privateKey = loadPrivateKey(privateKeyResource);
 
@@ -45,6 +45,7 @@ public class JWTUtilityServiceImpl implements IJWTUtilityService {
         Date now = new Date();
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(userId.toString())
+                .claim("userType", userType)
                 .issueTime(now)
                 .expirationTime(new Date(now.getTime() + 14400000)) // token expirará después de 4 horas
                 .build();
@@ -101,5 +102,11 @@ public class JWTUtilityServiceImpl implements IJWTUtilityService {
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return keyFactory.generatePublic(new X509EncodedKeySpec(decodedKey));
+    }
+
+    public String extractRoleFromJWT(String token)
+            throws ParseException, JOSEException, IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+        JWTClaimsSet claims = parseJWT(token); // Usa el método parseJWT existente
+        return claims.getStringClaim("userType"); // Extrae el rol
     }
 }
