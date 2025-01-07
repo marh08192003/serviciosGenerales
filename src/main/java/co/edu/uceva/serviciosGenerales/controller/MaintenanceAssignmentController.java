@@ -1,7 +1,10 @@
 package co.edu.uceva.serviciosGenerales.controller;
 
 import co.edu.uceva.serviciosGenerales.service.MaintenanceAssignmentService;
+import co.edu.uceva.serviciosGenerales.service.impl.JWTUtilityServiceImpl;
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceAssignmentDTO;
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +20,12 @@ import java.util.List;
 public class MaintenanceAssignmentController {
 
     private final MaintenanceAssignmentService maintenanceAssignmentService;
+    private final JWTUtilityServiceImpl jwtUtilityService;
 
-    public MaintenanceAssignmentController(MaintenanceAssignmentService maintenanceAssignmentService) {
+    public MaintenanceAssignmentController(MaintenanceAssignmentService maintenanceAssignmentService,
+            JWTUtilityServiceImpl jwtUtilityService) {
         this.maintenanceAssignmentService = maintenanceAssignmentService;
+        this.jwtUtilityService = jwtUtilityService;
     }
 
     /**
@@ -28,7 +34,15 @@ public class MaintenanceAssignmentController {
      * @return Lista de asignaciones activas.
      */
     @GetMapping("/list")
-    public ResponseEntity<List<MaintenanceAssignmentDTO>> listMaintenanceAssignments() {
+    public ResponseEntity<List<MaintenanceAssignmentDTO>> listMaintenanceAssignments(HttpServletRequest request)
+            throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         return ResponseEntity.ok(maintenanceAssignmentService.listMaintenanceAssignments());
     }
 
@@ -39,7 +53,15 @@ public class MaintenanceAssignmentController {
      * @return La asignación encontrada.
      */
     @GetMapping("/list/{id}")
-    public ResponseEntity<MaintenanceAssignmentDTO> getMaintenanceAssignmentById(@PathVariable Long id) {
+    public ResponseEntity<MaintenanceAssignmentDTO> getMaintenanceAssignmentById(@PathVariable Long id,
+            HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         return ResponseEntity.ok(maintenanceAssignmentService.getMaintenanceAssignmentById(id));
     }
 
@@ -51,9 +73,15 @@ public class MaintenanceAssignmentController {
      */
     @PostMapping("/create")
     public ResponseEntity<MaintenanceAssignmentDTO> createMaintenanceAssignment(
-            @RequestBody MaintenanceAssignmentDTO dto) {
-        return new ResponseEntity<>(maintenanceAssignmentService.createMaintenanceAssignment(dto),
-                HttpStatus.CREATED);
+            @RequestBody MaintenanceAssignmentDTO dto, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!userRole.equals("administrador")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>(maintenanceAssignmentService.createMaintenanceAssignment(dto), HttpStatus.CREATED);
     }
 
     /**
@@ -64,8 +92,17 @@ public class MaintenanceAssignmentController {
      * @return La asignación actualizada.
      */
     @PutMapping("/edit/{id}")
-    public ResponseEntity<MaintenanceAssignmentDTO> updateMaintenanceAssignment(@PathVariable Long id,
-            @RequestBody MaintenanceAssignmentDTO dto) {
+    public ResponseEntity<MaintenanceAssignmentDTO> updateMaintenanceAssignment(
+            @PathVariable Long id,
+            @RequestBody MaintenanceAssignmentDTO dto,
+            HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!userRole.equals("administrador")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         dto.setId(id);
         return ResponseEntity.ok(maintenanceAssignmentService.updateMaintenanceAssignment(dto));
     }
@@ -78,8 +115,17 @@ public class MaintenanceAssignmentController {
      * @return Respuesta HTTP 204 (sin contenido).
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteMaintenanceAssignment(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMaintenanceAssignment(@PathVariable Long id, HttpServletRequest request)
+            throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!userRole.equals("administrador")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         maintenanceAssignmentService.deleteMaintenanceAssignment(id);
         return ResponseEntity.noContent().build();
     }
+
 }

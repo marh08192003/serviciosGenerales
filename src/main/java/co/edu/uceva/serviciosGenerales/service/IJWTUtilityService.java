@@ -15,4 +15,6 @@ public interface IJWTUtilityService {
 
     public String generateJWT(Long userId, String userType)
             throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, JOSEException;
+
+
 }

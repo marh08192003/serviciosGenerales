@@ -1,7 +1,9 @@
 package co.edu.uceva.serviciosGenerales.controller;
 
 import co.edu.uceva.serviciosGenerales.service.MaintenanceService;
+import co.edu.uceva.serviciosGenerales.service.impl.JWTUtilityServiceImpl;
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +20,11 @@ import java.util.List;
 public class MaintenanceController {
 
     private final MaintenanceService maintenanceService;
+    private final JWTUtilityServiceImpl jwtUtilityService;
 
-    public MaintenanceController(MaintenanceService maintenanceService) {
+    public MaintenanceController(MaintenanceService maintenanceService, JWTUtilityServiceImpl jwtUtilityService) {
         this.maintenanceService = maintenanceService;
+        this.jwtUtilityService = jwtUtilityService;
     }
 
     /**
@@ -29,8 +33,17 @@ public class MaintenanceController {
      * @return Lista de mantenimientos activos.
      */
     @GetMapping("/list")
-    public ResponseEntity<List<MaintenanceDTO>> listMaintenances() {
-        return ResponseEntity.ok(maintenanceService.listMaintenances());
+    public ResponseEntity<List<MaintenanceDTO>> listMaintenances(HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null); // Devuelve una lista vacía con código 403
+        }
+
+        List<MaintenanceDTO> maintenances = maintenanceService.listMaintenances();
+        return ResponseEntity.ok(maintenances);
     }
 
     /**
@@ -40,7 +53,16 @@ public class MaintenanceController {
      * @return El mantenimiento encontrado.
      */
     @GetMapping("/list/{id}")
-    public ResponseEntity<MaintenanceDTO> getMaintenanceById(@PathVariable Long id) {
+    public ResponseEntity<MaintenanceDTO> getMaintenanceById(@PathVariable Long id, HttpServletRequest request)
+            throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null); // Devuelve null con código 403
+        }
+
         return ResponseEntity.ok(maintenanceService.getMaintenanceById(id));
     }
 
@@ -51,8 +73,18 @@ public class MaintenanceController {
      * @return El mantenimiento creado.
      */
     @PostMapping("/create")
-    public ResponseEntity<MaintenanceDTO> createMaintenance(@RequestBody MaintenanceDTO maintenanceDTO) {
-        return new ResponseEntity<>(maintenanceService.createMaintenance(maintenanceDTO), HttpStatus.CREATED);
+    public ResponseEntity<MaintenanceDTO> createMaintenance(@RequestBody MaintenanceDTO maintenanceDTO,
+            HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!userRole.equals("administrador")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null); // Devuelve null con código 403
+        }
+
+        MaintenanceDTO created = maintenanceService.createMaintenance(maintenanceDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     /**
@@ -64,7 +96,16 @@ public class MaintenanceController {
      */
     @PutMapping("/edit/{id}")
     public ResponseEntity<MaintenanceDTO> updateMaintenance(@PathVariable Long id,
-            @RequestBody MaintenanceDTO maintenanceDTO) {
+            @RequestBody MaintenanceDTO maintenanceDTO,
+            HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!userRole.equals("administrador")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null); // Devuelve null con código 403
+        }
+
         maintenanceDTO.setId(id);
         return ResponseEntity.ok(maintenanceService.updateMaintenance(maintenanceDTO));
     }
@@ -76,7 +117,14 @@ public class MaintenanceController {
      * @return Respuesta HTTP 204 (sin contenido).
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteMaintenance(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMaintenance(@PathVariable Long id, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!userRole.equals("administrador")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         maintenanceService.deleteMaintenance(id);
         return ResponseEntity.noContent().build();
     }

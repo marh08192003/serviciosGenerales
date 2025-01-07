@@ -1,11 +1,15 @@
 package co.edu.uceva.serviciosGenerales.controller;
 
 import co.edu.uceva.serviciosGenerales.service.IncidentService;
+import co.edu.uceva.serviciosGenerales.service.impl.JWTUtilityServiceImpl;
 import co.edu.uceva.serviciosGenerales.service.model.dto.IncidentDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
 
 import java.util.List;
 
@@ -18,81 +22,96 @@ import java.util.List;
 public class IncidentController {
 
     private final IncidentService incidentService;
+    private final JWTUtilityServiceImpl jwtUtilityService;
 
-    public IncidentController(IncidentService incidentService) {
+    public IncidentController(IncidentService incidentService, JWTUtilityServiceImpl jwtUtilityService) {
         this.incidentService = incidentService;
+        this.jwtUtilityService = jwtUtilityService;
     }
 
-    /**
-     * Endpoint para crear una nueva incidencia.
-     *
-     * @param incidentDTO Datos de la incidencia a crear.
-     * @return Incidencia creada con estado HTTP 201.
-     */
+    // Crear incidencia (accesible para todos los usuarios)
     @PostMapping("/create")
-    public ResponseEntity<IncidentDTO> createIncident(@Valid @RequestBody IncidentDTO incidentDTO) {
+    public ResponseEntity<IncidentDTO> createIncident(@Valid @RequestBody IncidentDTO incidentDTO,
+            HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token)); // Extrae el ID del usuario desde el JWT
+
+        incidentDTO.setUserId(userId); // Asocia la incidencia al usuario autenticado
         IncidentDTO created = incidentService.createIncident(incidentDTO);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    /**
-     * Endpoint para actualizar una incidencia existente.
-     *
-     * @param id          ID de la incidencia a actualizar.
-     * @param incidentDTO Datos de la incidencia actualizados.
-     * @return Incidencia actualizada.
-     */
-    @PutMapping("/edit/{id}")
-    public ResponseEntity<IncidentDTO> updateIncident(
-            @PathVariable Long id,
-            @Valid @RequestBody IncidentDTO incidentDTO) {
-        IncidentDTO updated = incidentService.updateIncident(id, incidentDTO);
-        return ResponseEntity.ok(updated);
+    // Listar incidencias del usuario autenticado
+    @GetMapping("/list/my-incidents")
+    public ResponseEntity<List<IncidentDTO>> listMyIncidents(HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token)); // Extrae el ID del usuario desde el JWT
+
+        List<IncidentDTO> myIncidents = incidentService.listIncidentsByUserId(userId);
+        return ResponseEntity.ok(myIncidents);
     }
 
-    /**
-     * Endpoint para obtener una incidencia por su ID.
-     *
-     * @param id ID de la incidencia a buscar.
-     * @return Incidencia encontrada.
-     */
+    // Obtener una incidencia por su ID (solo si pertenece al usuario autenticado)
     @GetMapping("/list/{id}")
-    public ResponseEntity<IncidentDTO> getIncidentById(@PathVariable Long id) {
+    public ResponseEntity<IncidentDTO> getIncidentById(@PathVariable Long id, HttpServletRequest request)
+            throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token)); // Extrae el ID del usuario desde el JWT
+
         IncidentDTO incident = incidentService.getIncidentById(id);
+
+        // Verifica si la incidencia pertenece al usuario autenticado
+        if (!incident.getUserId().equals(userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         return ResponseEntity.ok(incident);
     }
 
-    /**
-     * Endpoint para listar todas las incidencias activas.
-     *
-     * @return Lista de incidencias activas.
-     */
+    // Listar todas las incidencias (solo para servicios generales y
+    // administradores)
     @GetMapping("/list")
-    public ResponseEntity<List<IncidentDTO>> listActiveIncidents() {
+    public ResponseEntity<List<IncidentDTO>> listAllIncidents(HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        // Validar roles
+        if (!(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         List<IncidentDTO> incidents = incidentService.listActiveIncidents();
         return ResponseEntity.ok(incidents);
     }
 
-    /**
-     * Endpoint para listar incidencias activas por área física.
-     *
-     * @param physicalAreaId ID del área física.
-     * @return Lista de incidencias activas relacionadas con el área física.
-     */
-    @GetMapping("/list/area/{physicalAreaId}")
-    public ResponseEntity<List<IncidentDTO>> listIncidentsByPhysicalArea(@PathVariable Long physicalAreaId) {
-        List<IncidentDTO> incidents = incidentService.listIncidentsByPhysicalArea(physicalAreaId);
-        return ResponseEntity.ok(incidents);
+    // Actualizar una incidencia (solo para servicios generales y administradores)
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<IncidentDTO> updateIncident(
+            @PathVariable Long id,
+            @Valid @RequestBody IncidentDTO incidentDTO,
+            HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        IncidentDTO updated = incidentService.updateIncident(id, incidentDTO);
+        return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Endpoint para eliminar (soft delete) una incidencia.
-     *
-     * @param id ID de la incidencia a eliminar.
-     * @return Respuesta HTTP 204 (sin contenido).
-     */
+    // Eliminar una incidencia (solo para servicios generales y administradores)
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteIncident(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteIncident(@PathVariable Long id, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         incidentService.deleteIncident(id);
         return ResponseEntity.noContent().build();
     }

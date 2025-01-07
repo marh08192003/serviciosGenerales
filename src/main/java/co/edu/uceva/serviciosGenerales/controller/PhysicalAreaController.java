@@ -1,7 +1,9 @@
 package co.edu.uceva.serviciosGenerales.controller;
 
 import co.edu.uceva.serviciosGenerales.service.PhysicalAreaService;
+import co.edu.uceva.serviciosGenerales.service.impl.JWTUtilityServiceImpl;
 import co.edu.uceva.serviciosGenerales.service.model.dto.PhysicalAreaDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +21,11 @@ public class PhysicalAreaController {
 
     private final PhysicalAreaService physicalAreaService;
 
-    public PhysicalAreaController(PhysicalAreaService physicalAreaService) {
+    private final JWTUtilityServiceImpl jwtUtilityService;
+
+    public PhysicalAreaController(PhysicalAreaService physicalAreaService, JWTUtilityServiceImpl jwtUtilityService) {
         this.physicalAreaService = physicalAreaService;
+        this.jwtUtilityService = jwtUtilityService;
     }
 
     /**
@@ -53,7 +58,17 @@ public class PhysicalAreaController {
      * @return The created physical area.
      */
     @PostMapping("/create")
-    public ResponseEntity<PhysicalAreaDTO> createPhysicalArea(@Valid @RequestBody PhysicalAreaDTO physicalAreaDTO) {
+    public ResponseEntity<PhysicalAreaDTO> createPhysicalArea(@Valid @RequestBody PhysicalAreaDTO physicalAreaDTO,
+            HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!userRole.equals("administrador")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null); // Mensaje opcional: "Acceso denegado: Solo los administradores pueden crear
+                                 // áreas físicas."
+        }
+
         PhysicalAreaDTO created = physicalAreaService.createPhysicalArea(physicalAreaDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -68,7 +83,16 @@ public class PhysicalAreaController {
     @PutMapping("/edit/{id}")
     public ResponseEntity<PhysicalAreaDTO> updatePhysicalArea(
             @PathVariable Long id,
-            @Valid @RequestBody PhysicalAreaDTO physicalAreaDTO) {
+            @Valid @RequestBody PhysicalAreaDTO physicalAreaDTO,
+            HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!userRole.equals("administrador")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null); // Mensaje opcional: "Acceso denegado: Solo los administradores pueden
+                                 // actualizar áreas físicas."
+        }
 
         physicalAreaDTO.setId(id);
         PhysicalAreaDTO updated = physicalAreaService.updatePhysicalArea(physicalAreaDTO);
@@ -82,8 +106,18 @@ public class PhysicalAreaController {
      * @return A response indicating the deletion was successful.
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deletePhysicalArea(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePhysicalArea(@PathVariable Long id, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        String userRole = jwtUtilityService.extractRoleFromJWT(token);
+
+        if (!userRole.equals("administrador")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Mensaje opcional: "Acceso denegado: Solo los
+                                                                        // administradores pueden eliminar áreas
+                                                                        // físicas."
+        }
+
         physicalAreaService.deletePhysicalArea(id);
         return ResponseEntity.noContent().build();
     }
+
 }

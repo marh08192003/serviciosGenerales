@@ -116,6 +116,22 @@ public class IncidentServiceImpl implements IncidentService {
                 .toList();
     }
 
+    @Override
+    public List<IncidentDTO> listIncidentsByUserId(Long userId) {
+        // Consulta incidencias activas por usuario
+        List<IncidentEntity> incidents = incidentRepository.findByUserIdAndActiveTrue(userId);
+
+        if (incidents.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No se encontraron incidencias activas para el usuario con ID: " + userId);
+        }
+
+        // Convierte las entidades a DTOs antes de devolverlas
+        return incidents.stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
     // -------------------------------------------------------------------------------------------
     // Métodos privados de mapeo
     // -------------------------------------------------------------------------------------------

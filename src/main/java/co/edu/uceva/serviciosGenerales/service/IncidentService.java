@@ -21,7 +21,7 @@ public interface IncidentService {
     /**
      * Actualiza una incidencia existente.
      * 
-     * @param id Identificador de la incidencia a actualizar.
+     * @param id          Identificador de la incidencia a actualizar.
      * @param incidentDTO Datos actualizados de la incidencia.
      * @return La incidencia actualizada como un DTO.
      */
@@ -56,4 +56,12 @@ public interface IncidentService {
      * @return Lista de incidencias activas como DTOs.
      */
     List<IncidentDTO> listIncidentsByPhysicalArea(Long physicalAreaId);
+
+    /**
+     * Lista todas las incidencias activas asociadas a un usuario específico.
+     *
+     * @param userId Identificador del usuario.
+     * @return Lista de incidencias activas como DTOs.
+     */
+    List<IncidentDTO> listIncidentsByUserId(Long userId);
 }

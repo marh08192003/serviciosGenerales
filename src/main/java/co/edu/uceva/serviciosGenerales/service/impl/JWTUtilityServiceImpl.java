@@ -104,9 +104,17 @@ public class JWTUtilityServiceImpl implements IJWTUtilityService {
         return keyFactory.generatePublic(new X509EncodedKeySpec(decodedKey));
     }
 
+    // Extraer el rol del JWT
     public String extractRoleFromJWT(String token)
             throws ParseException, JOSEException, IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         JWTClaimsSet claims = parseJWT(token); // Usa el método parseJWT existente
         return claims.getStringClaim("userType"); // Extrae el rol
     }
+
+    // Extraer el ID del usuario del JWT
+    public String extractUserIdFromJWT(String token) throws Exception {
+        JWTClaimsSet claims = parseJWT(token); // Usa el método parseJWT existente
+        return claims.getSubject(); // Suponiendo que el ID del usuario está en el 'subject'
+    }
+
 }
