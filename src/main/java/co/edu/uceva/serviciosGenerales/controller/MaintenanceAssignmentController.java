@@ -1,5 +1,6 @@
 package co.edu.uceva.serviciosGenerales.controller;
 
+import co.edu.uceva.serviciosGenerales.exception.UnauthorizedException;
 import co.edu.uceva.serviciosGenerales.service.MaintenanceAssignmentService;
 import co.edu.uceva.serviciosGenerales.service.impl.JWTUtilityServiceImpl;
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceAssignmentDTO;
@@ -9,6 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.nimbusds.jose.JOSEException;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,110 +30,63 @@ public class MaintenanceAssignmentController {
     private final MaintenanceAssignmentService maintenanceAssignmentService;
     private final JWTUtilityServiceImpl jwtUtilityService;
 
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String ROLE_ADMIN = "administrador";
+    private static final String ROLE_SERVICIOS_GENERALES = "servicios_generales";
+
     public MaintenanceAssignmentController(MaintenanceAssignmentService maintenanceAssignmentService,
             JWTUtilityServiceImpl jwtUtilityService) {
         this.maintenanceAssignmentService = maintenanceAssignmentService;
         this.jwtUtilityService = jwtUtilityService;
     }
 
-    /**
-     * Endpoint para listar todas las asignaciones de mantenimiento activas.
-     * 
-     * @return Lista de asignaciones activas.
-     */
-    @GetMapping("/list")
-    public ResponseEntity<List<MaintenanceAssignmentDTO>> listMaintenanceAssignments(HttpServletRequest request)
-            throws Exception {
-        String token = request.getHeader("Authorization").substring(7);
+    private void validateRole(HttpServletRequest request, String... allowedRoles)
+            throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
+        String token = request.getHeader(AUTHORIZATION_HEADER).substring(7);
         String userRole = jwtUtilityService.extractRoleFromJWT(token);
 
-        if (!(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        if (!Arrays.asList(allowedRoles).contains(userRole)) {
+            throw new UnauthorizedException("Access denied: insufficient permissions");
         }
+    }
 
+    @GetMapping("/list")
+    public ResponseEntity<List<MaintenanceAssignmentDTO>> listMaintenanceAssignments(HttpServletRequest request)
+            throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
+        validateRole(request, ROLE_SERVICIOS_GENERALES, ROLE_ADMIN);
         return ResponseEntity.ok(maintenanceAssignmentService.listMaintenanceAssignments());
     }
 
-    /**
-     * Endpoint para obtener una asignación de mantenimiento por su ID.
-     * 
-     * @param id ID de la asignación.
-     * @return La asignación encontrada.
-     */
     @GetMapping("/list/{id}")
     public ResponseEntity<MaintenanceAssignmentDTO> getMaintenanceAssignmentById(@PathVariable Long id,
-            HttpServletRequest request) throws Exception {
-        String token = request.getHeader("Authorization").substring(7);
-        String userRole = jwtUtilityService.extractRoleFromJWT(token);
-
-        if (!(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
+            HttpServletRequest request)
+            throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
+        validateRole(request, ROLE_SERVICIOS_GENERALES, ROLE_ADMIN);
         return ResponseEntity.ok(maintenanceAssignmentService.getMaintenanceAssignmentById(id));
     }
 
-    /**
-     * Endpoint para crear una nueva asignación de mantenimiento.
-     * 
-     * @param dto Datos de la asignación a crear.
-     * @return La asignación creada.
-     */
     @PostMapping("/create")
     public ResponseEntity<MaintenanceAssignmentDTO> createMaintenanceAssignment(
-            @RequestBody MaintenanceAssignmentDTO dto, HttpServletRequest request) throws Exception {
-        String token = request.getHeader("Authorization").substring(7);
-        String userRole = jwtUtilityService.extractRoleFromJWT(token);
-
-        if (!userRole.equals("administrador")) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
+            @RequestBody MaintenanceAssignmentDTO dto, HttpServletRequest request)
+            throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
+        validateRole(request, ROLE_ADMIN);
         return new ResponseEntity<>(maintenanceAssignmentService.createMaintenanceAssignment(dto), HttpStatus.CREATED);
     }
 
-    /**
-     * Endpoint para actualizar una asignación de mantenimiento existente.
-     * 
-     * @param id  ID de la asignación a actualizar.
-     * @param dto Datos actualizados de la asignación.
-     * @return La asignación actualizada.
-     */
     @PutMapping("/edit/{id}")
-    public ResponseEntity<MaintenanceAssignmentDTO> updateMaintenanceAssignment(
-            @PathVariable Long id,
-            @RequestBody MaintenanceAssignmentDTO dto,
-            HttpServletRequest request) throws Exception {
-        String token = request.getHeader("Authorization").substring(7);
-        String userRole = jwtUtilityService.extractRoleFromJWT(token);
-
-        if (!userRole.equals("administrador")) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
+    public ResponseEntity<MaintenanceAssignmentDTO> updateMaintenanceAssignment(@PathVariable Long id,
+            @RequestBody MaintenanceAssignmentDTO dto, HttpServletRequest request)
+            throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
+        validateRole(request, ROLE_ADMIN);
         dto.setId(id);
         return ResponseEntity.ok(maintenanceAssignmentService.updateMaintenanceAssignment(dto));
     }
 
-    /**
-     * Endpoint para eliminar (soft delete) una asignación de mantenimiento por su
-     * ID.
-     * 
-     * @param id ID de la asignación a eliminar.
-     * @return Respuesta HTTP 204 (sin contenido).
-     */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteMaintenanceAssignment(@PathVariable Long id, HttpServletRequest request)
-            throws Exception {
-        String token = request.getHeader("Authorization").substring(7);
-        String userRole = jwtUtilityService.extractRoleFromJWT(token);
-
-        if (!userRole.equals("administrador")) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
+            throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
+        validateRole(request, ROLE_ADMIN);
         maintenanceAssignmentService.deleteMaintenanceAssignment(id);
         return ResponseEntity.noContent().build();
     }
-
 }
