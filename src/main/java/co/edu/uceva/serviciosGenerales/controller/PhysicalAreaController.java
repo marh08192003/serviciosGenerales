@@ -38,10 +38,10 @@ public class PhysicalAreaController {
     }
 
     /**
-     * Método para validar el rol del usuario.
+     * Validate the user's role.
      *
-     * @param request      La solicitud HTTP.
-     * @param allowedRoles Roles permitidos para el acceso.
+     * @param request      The HTTP request.
+     * @param allowedRoles Allowed roles for access.
      * @throws IOException
      * @throws JOSEException
      * @throws ParseException
@@ -59,9 +59,10 @@ public class PhysicalAreaController {
     }
 
     /**
-     * Endpoint para listar todas las áreas físicas activas.
+     * Endpoint to list all active physical areas.
+     * Accessible by all authenticated users.
      *
-     * @return Una lista de áreas físicas activas.
+     * @return A list of active physical areas.
      */
     @GetMapping("/list")
     public ResponseEntity<List<PhysicalAreaDTO>> listPhysicalAreas() {
@@ -70,10 +71,11 @@ public class PhysicalAreaController {
     }
 
     /**
-     * Endpoint para obtener un área física por su ID.
+     * Endpoint to get a physical area by its ID.
+     * Accessible by all authenticated users.
      *
-     * @param id El identificador único del área física.
-     * @return El área física encontrada.
+     * @param id The unique identifier of the physical area.
+     * @return The found physical area.
      */
     @GetMapping("/list/{id}")
     public ResponseEntity<PhysicalAreaDTO> getPhysicalAreaById(@PathVariable Long id) {
@@ -82,11 +84,12 @@ public class PhysicalAreaController {
     }
 
     /**
-     * Endpoint para crear una nueva área física.
+     * Endpoint to create a new physical area.
+     * Accessible only by administrators.
      *
-     * @param physicalAreaDTO Los detalles del área física a crear.
-     * @param request         La solicitud HTTP.
-     * @return El área física creada.
+     * @param physicalAreaDTO The details of the physical area to create.
+     * @param request         The HTTP request.
+     * @return The created physical area.
      * @throws IOException
      * @throws JOSEException
      * @throws ParseException
@@ -104,12 +107,13 @@ public class PhysicalAreaController {
     }
 
     /**
-     * Endpoint para actualizar un área física existente.
+     * Endpoint to update an existing physical area.
+     * Accessible only by administrators.
      *
-     * @param id              El identificador único del área física a actualizar.
-     * @param physicalAreaDTO Los detalles actualizados del área física.
-     * @param request         La solicitud HTTP.
-     * @return El área física actualizada.
+     * @param id              The unique identifier of the physical area to update.
+     * @param physicalAreaDTO The updated details of the physical area.
+     * @param request         The HTTP request.
+     * @return The updated physical area.
      * @throws IOException
      * @throws JOSEException
      * @throws ParseException
@@ -129,11 +133,12 @@ public class PhysicalAreaController {
     }
 
     /**
-     * Endpoint para eliminar (soft delete) un área física por su ID.
+     * Endpoint to delete (soft delete) a physical area by its ID.
+     * Accessible only by administrators.
      *
-     * @param id      El identificador único del área física a eliminar.
-     * @param request La solicitud HTTP.
-     * @return Una respuesta indicando que la eliminación fue exitosa.
+     * @param id      The unique identifier of the physical area to delete.
+     * @param request The HTTP request.
+     * @return A response indicating successful deletion.
      * @throws IOException
      * @throws JOSEException
      * @throws ParseException

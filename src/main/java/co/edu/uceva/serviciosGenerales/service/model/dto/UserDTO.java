@@ -9,7 +9,13 @@ import lombok.Data;
 @Data
 public class UserDTO {
 
-    @NotNull(message = "The ID cannot be null")
+    public interface Create {
+    }
+
+    public interface Update {
+    }
+
+    @NotNull(groups = Update.class, message = "The ID cannot be null")
     private Long id;
 
     @NotBlank(message = "First name is required")
@@ -26,8 +32,8 @@ public class UserDTO {
     @NotBlank(message = "Institutional email is required")
     @Email(message = "A valid email must be provided")
     private String institutionalEmail;
- 
-    @NotBlank(message = "Password is required")
+
+    @NotBlank(groups = Create.class, message = "Password is required for creation")
     private String password;
 
     /**

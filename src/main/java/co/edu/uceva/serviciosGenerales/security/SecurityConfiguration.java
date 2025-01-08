@@ -21,33 +21,41 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
 
-    private final IJWTUtilityService jwtUtilityService; // Declarar el campo como final
+        private final IJWTUtilityService jwtUtilityService; // Declarar el campo como final
 
-    @Autowired
-    public SecurityConfiguration(IJWTUtilityService jwtUtilityService) {
-        this.jwtUtilityService = jwtUtilityService; // Inicialización a través del constructor
-    }
+        @Autowired
+        public SecurityConfiguration(IJWTUtilityService jwtUtilityService) {
+                this.jwtUtilityService = jwtUtilityService; // Inicialización a través del constructor
+        }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authRequest -> authRequest
-                        .requestMatchers("/auth/**").permitAll() // Permitir acceso sin autenticación a /auth/**
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permitir solicitudes OPTIONS (CORS)
-                        .anyRequest().authenticated()) // Requiere autenticación para todas las demás solicitudes
-                .sessionManagement(sessionManager -> sessionManager
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JWTAuthorizationFilter((JWTUtilityServiceImpl) jwtUtilityService),
-                        UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(
-                        (request, response, authException) -> response.sendError(
-                                HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
-                .build();
-    }
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                return http
+                                .csrf(csrf -> csrf.disable())
+                                .authorizeHttpRequests(authRequest -> authRequest
+                                                .requestMatchers("/auth/**").permitAll() // Permitir acceso sin
+                                                                                         // autenticación a /auth/**
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/physical-areas/list")
+                                                .hasAnyAuthority("estudiante", "profesor", "administrador",
+                                                                "servicios_generales")
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permitir
+                                                                                                        // solicitudes
+                                                                                                        // OPTIONS
+                                                                                                        // (CORS)
+                                                .anyRequest().authenticated()) // Requiere autenticación para todas las
+                                                                               // demás solicitudes
+                                .sessionManagement(sessionManager -> sessionManager
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .addFilterBefore(new JWTAuthorizationFilter((JWTUtilityServiceImpl) jwtUtilityService),
+                                                UsernamePasswordAuthenticationFilter.class)
+                                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(
+                                                (request, response, authException) -> response.sendError(
+                                                                HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
+                                .build();
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 }
