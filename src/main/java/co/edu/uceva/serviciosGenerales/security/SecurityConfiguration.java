@@ -35,9 +35,6 @@ public class SecurityConfiguration {
                                 .authorizeHttpRequests(authRequest -> authRequest
                                                 .requestMatchers("/auth/**").permitAll() // Permitir acceso sin
                                                                                          // autenticación a /auth/**
-                                                .requestMatchers(HttpMethod.GET, "/api/v1/physical-areas/list")
-                                                .hasAnyAuthority("estudiante", "profesor", "administrador",
-                                                                "servicios_generales")
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permitir
                                                                                                         // solicitudes
                                                                                                         // OPTIONS
