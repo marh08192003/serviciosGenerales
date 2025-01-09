@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> listUsers() {
-        List<UserEntity> users = userRepository.findAll(); // No filtrar por active
+        List<UserEntity> users = userRepository.findByActiveTrue(); // Filtrar solo usuarios activos
         return users.stream()
                 .map(this::mapToDTO)
                 .toList();
