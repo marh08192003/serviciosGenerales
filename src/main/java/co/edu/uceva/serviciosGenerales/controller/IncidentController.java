@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-
 import java.util.List;
 
 /**
@@ -34,7 +32,8 @@ public class IncidentController {
     public ResponseEntity<IncidentDTO> createIncident(@Valid @RequestBody IncidentDTO incidentDTO,
             HttpServletRequest request) throws Exception {
         String token = request.getHeader("Authorization").substring(7);
-        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token)); // Extrae el ID del usuario desde el JWT
+        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token)); // Extrae el ID del usuario desde
+                                                                                     // el JWT
 
         incidentDTO.setUserId(userId); // Asocia la incidencia al usuario autenticado
         IncidentDTO created = incidentService.createIncident(incidentDTO);
@@ -46,23 +45,28 @@ public class IncidentController {
     @GetMapping("/list/my-incidents")
     public ResponseEntity<List<IncidentDTO>> listMyIncidents(HttpServletRequest request) throws Exception {
         String token = request.getHeader("Authorization").substring(7);
-        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token)); // Extrae el ID del usuario desde el JWT
+        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token)); // Extrae el ID del usuario desde
+                                                                                     // el JWT
 
         List<IncidentDTO> myIncidents = incidentService.listIncidentsByUserId(userId);
         return ResponseEntity.ok(myIncidents);
     }
 
-    // Obtener una incidencia por su ID (solo si pertenece al usuario autenticado)
+    // Obtener una incidencia por su ID (usuarios autenticados pueden acceder a las
+    // suyas, roles especiales pueden acceder a todas)
     @GetMapping("/list/{id}")
     public ResponseEntity<IncidentDTO> getIncidentById(@PathVariable Long id, HttpServletRequest request)
             throws Exception {
         String token = request.getHeader("Authorization").substring(7);
-        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token)); // Extrae el ID del usuario desde el JWT
+        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token)); // Extrae el ID del usuario desde
+                                                                                     // el JWT
+        String userRole = jwtUtilityService.extractRoleFromJWT(token); // Extrae el rol del usuario desde el JWT
 
         IncidentDTO incident = incidentService.getIncidentById(id);
 
-        // Verifica si la incidencia pertenece al usuario autenticado
-        if (!incident.getUserId().equals(userId)) {
+        // Verifica si el usuario tiene permiso para acceder a la incidencia
+        if (!incident.getUserId().equals(userId) &&
+                !(userRole.equals("servicios_generales") || userRole.equals("administrador"))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
