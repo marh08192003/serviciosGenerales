@@ -9,6 +9,8 @@ import co.edu.uceva.serviciosGenerales.persistence.repository.MaintenanceReposit
 import co.edu.uceva.serviciosGenerales.persistence.repository.UserRepository;
 import co.edu.uceva.serviciosGenerales.service.MaintenanceAssignmentService;
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceAssignmentDTO;
+import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceDTO;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,4 +98,21 @@ public class MaintenanceAssignmentServiceImpl implements MaintenanceAssignmentSe
         dto.setActive(entity.getActive());
         return dto;
     }
+
+    @Override
+    public List<MaintenanceAssignmentDTO> listAssignmentsForUser(Long userId) {
+        List<MaintenanceAssignmentEntity> assignments = maintenanceAssignmentRepository
+                .findByUserIdAndActiveTrue(userId);
+
+        return assignments.stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
+    @Override
+    public List<MaintenanceDTO> listMaintenancesAssignedToUser(Long userId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'listMaintenancesAssignedToUser'");
+    }
+
 }

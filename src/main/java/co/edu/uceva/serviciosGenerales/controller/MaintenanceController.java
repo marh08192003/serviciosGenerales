@@ -19,8 +19,6 @@ import java.util.List;
 
 /**
  * Controlador REST para la gestión de mantenimientos.
- * Proporciona endpoints para crear, actualizar, listar y eliminar
- * mantenimientos.
  */
 @RestController
 @RequestMapping("/api/v1/maintenances")
@@ -38,6 +36,9 @@ public class MaintenanceController {
         this.jwtUtilityService = jwtUtilityService;
     }
 
+    /**
+     * Valida si el usuario tiene el rol necesario para realizar la acción.
+     */
     private void validateRole(HttpServletRequest request, String... allowedRoles)
             throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
         String token = request.getHeader(AUTHORIZATION_HEADER).substring(7);
@@ -48,6 +49,9 @@ public class MaintenanceController {
         }
     }
 
+    /**
+     * Lista todos los mantenimientos activos.
+     */
     @GetMapping("/list")
     public ResponseEntity<List<MaintenanceDTO>> listMaintenances(HttpServletRequest request)
             throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
@@ -56,6 +60,9 @@ public class MaintenanceController {
         return ResponseEntity.ok(maintenances);
     }
 
+    /**
+     * Obtiene un mantenimiento específico por su ID.
+     */
     @GetMapping("/list/{id}")
     public ResponseEntity<MaintenanceDTO> getMaintenanceById(@PathVariable Long id, HttpServletRequest request)
             throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
@@ -63,6 +70,9 @@ public class MaintenanceController {
         return ResponseEntity.ok(maintenanceService.getMaintenanceById(id));
     }
 
+    /**
+     * Crea un nuevo mantenimiento.
+     */
     @PostMapping("/create")
     public ResponseEntity<MaintenanceDTO> createMaintenance(@RequestBody MaintenanceDTO maintenanceDTO,
             HttpServletRequest request)
@@ -72,6 +82,9 @@ public class MaintenanceController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
+    /**
+     * Actualiza un mantenimiento existente.
+     */
     @PutMapping("/edit/{id}")
     public ResponseEntity<MaintenanceDTO> updateMaintenance(@PathVariable Long id,
             @RequestBody MaintenanceDTO maintenanceDTO,
@@ -82,6 +95,10 @@ public class MaintenanceController {
         return ResponseEntity.ok(maintenanceService.updateMaintenance(maintenanceDTO));
     }
 
+    /**
+     * Realiza un soft delete de un mantenimiento, inactivando también sus
+     * asignaciones relacionadas.
+     */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteMaintenance(@PathVariable Long id, HttpServletRequest request)
             throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {

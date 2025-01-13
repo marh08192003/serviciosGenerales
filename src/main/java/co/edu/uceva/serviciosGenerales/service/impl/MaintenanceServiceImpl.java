@@ -1,13 +1,16 @@
 package co.edu.uceva.serviciosGenerales.service.impl;
 
 import co.edu.uceva.serviciosGenerales.exception.ResourceNotFoundException;
-import co.edu.uceva.serviciosGenerales.persistence.entity.PhysicalAreaEntity;
+import co.edu.uceva.serviciosGenerales.persistence.entity.MaintenanceAssignmentEntity;
 import co.edu.uceva.serviciosGenerales.persistence.entity.MaintenanceEntity;
-import co.edu.uceva.serviciosGenerales.persistence.repository.PhysicalAreaRepository;
+import co.edu.uceva.serviciosGenerales.persistence.entity.PhysicalAreaEntity;
+import co.edu.uceva.serviciosGenerales.persistence.repository.MaintenanceAssignmentRepository;
 import co.edu.uceva.serviciosGenerales.persistence.repository.MaintenanceRepository;
+import co.edu.uceva.serviciosGenerales.persistence.repository.PhysicalAreaRepository;
 import co.edu.uceva.serviciosGenerales.service.MaintenanceService;
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceDTO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,16 +18,21 @@ import java.util.List;
  * Implementación del servicio de gestión de mantenimientos.
  */
 @Service
+@Transactional
 public class MaintenanceServiceImpl implements MaintenanceService {
 
     private static final String MAINTENANCE_NOT_FOUND_MESSAGE = "Mantenimiento no encontrado";
+    private static final String PHYSICAL_AREA_NOT_FOUND_MESSAGE = "El área física no está activa o no existe";
 
     private final MaintenanceRepository maintenanceRepository;
+    private final MaintenanceAssignmentRepository maintenanceAssignmentRepository;
     private final PhysicalAreaRepository physicalAreaRepository;
 
     public MaintenanceServiceImpl(MaintenanceRepository maintenanceRepository,
+            MaintenanceAssignmentRepository maintenanceAssignmentRepository,
             PhysicalAreaRepository physicalAreaRepository) {
         this.maintenanceRepository = maintenanceRepository;
+        this.maintenanceAssignmentRepository = maintenanceAssignmentRepository;
         this.physicalAreaRepository = physicalAreaRepository;
     }
 
@@ -32,7 +40,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     public MaintenanceDTO createMaintenance(MaintenanceDTO maintenanceDTO) {
         PhysicalAreaEntity physicalArea = physicalAreaRepository
                 .findByIdAndActiveTrue(maintenanceDTO.getPhysicalAreaId())
-                .orElseThrow(() -> new ResourceNotFoundException("El área física no está activa o no existe"));
+                .orElseThrow(() -> new ResourceNotFoundException(PHYSICAL_AREA_NOT_FOUND_MESSAGE));
 
         MaintenanceEntity entity = mapToEntity(maintenanceDTO);
         entity.setPhysicalArea(physicalArea);
@@ -71,10 +79,18 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     @Override
     public void deleteMaintenance(Long id) {
-        MaintenanceEntity entity = maintenanceRepository.findById(id)
+        MaintenanceEntity maintenanceEntity = maintenanceRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MAINTENANCE_NOT_FOUND_MESSAGE));
-        entity.setActive(false);
-        maintenanceRepository.save(entity);
+
+        // Eliminar (soft delete) todas las asignaciones relacionadas con el
+        // mantenimiento
+        List<MaintenanceAssignmentEntity> assignments = maintenanceAssignmentRepository.findByMaintenanceId(id);
+        assignments.forEach(assignment -> assignment.setActive(false));
+        maintenanceAssignmentRepository.saveAll(assignments);
+
+        // Realizar soft delete del mantenimiento
+        maintenanceEntity.setActive(false);
+        maintenanceRepository.save(maintenanceEntity);
     }
 
     private MaintenanceEntity mapToEntity(MaintenanceDTO dto) {

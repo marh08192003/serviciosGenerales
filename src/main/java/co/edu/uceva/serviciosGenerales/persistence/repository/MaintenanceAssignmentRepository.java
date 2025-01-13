@@ -2,6 +2,8 @@ package co.edu.uceva.serviciosGenerales.persistence.repository;
 
 import co.edu.uceva.serviciosGenerales.persistence.entity.MaintenanceAssignmentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +11,8 @@ import java.util.Optional;
 /**
  * Repositorio para la gestión de operaciones con la entidad
  * MaintenanceAssignmentEntity.
- * Proporciona métodos adicionales para consultar asignaciones activas.
+ * Proporciona métodos adicionales para consultar asignaciones activas y
+ * relacionadas.
  */
 public interface MaintenanceAssignmentRepository extends JpaRepository<MaintenanceAssignmentEntity, Long> {
 
@@ -27,4 +30,18 @@ public interface MaintenanceAssignmentRepository extends JpaRepository<Maintenan
      * @return Asignación activa si se encuentra.
      */
     Optional<MaintenanceAssignmentEntity> findByIdAndActiveTrue(Long id);
+
+    /**
+     * Encuentra todas las asignaciones relacionadas con un mantenimiento
+     * específico.
+     * 
+     * @param maintenanceId ID del mantenimiento asociado.
+     * @return Lista de asignaciones relacionadas.
+     */
+    @Query("SELECT ma FROM MaintenanceAssignmentEntity ma WHERE ma.maintenance.id = :maintenanceId AND ma.active = true")
+    List<MaintenanceAssignmentEntity> findByMaintenanceId(@Param("maintenanceId") Long maintenanceId);
+
+    List<MaintenanceAssignmentEntity> findByUserIdAndActiveTrue(Long userId);
+
+
 }

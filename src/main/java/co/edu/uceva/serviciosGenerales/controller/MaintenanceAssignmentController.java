@@ -77,7 +77,7 @@ public class MaintenanceAssignmentController {
     public ResponseEntity<MaintenanceAssignmentDTO> updateMaintenanceAssignment(@PathVariable Long id,
             @RequestBody MaintenanceAssignmentDTO dto, HttpServletRequest request)
             throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
-        validateRole(request, ROLE_ADMIN);
+        validateRole(request, ROLE_ADMIN, ROLE_SERVICIOS_GENERALES);
         dto.setId(id);
         return ResponseEntity.ok(maintenanceAssignmentService.updateMaintenanceAssignment(dto));
     }
@@ -89,4 +89,22 @@ public class MaintenanceAssignmentController {
         maintenanceAssignmentService.deleteMaintenanceAssignment(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/list/assigned-to-me")
+    public ResponseEntity<List<MaintenanceAssignmentDTO>> listAssignedMaintenances(HttpServletRequest request)
+            throws Exception {
+        // Extraer el token del encabezado Authorization
+        String token = request.getHeader(AUTHORIZATION_HEADER).substring(7);
+
+        // Extraer el ID del usuario desde el token
+        Long userId = Long.parseLong(jwtUtilityService.extractUserIdFromJWT(token));
+
+        // Obtener las asignaciones de mantenimiento del usuario
+        List<MaintenanceAssignmentDTO> assignedMaintenances = maintenanceAssignmentService
+                .listAssignmentsForUser(userId);
+
+        // Retornar las asignaciones de mantenimiento
+        return ResponseEntity.ok(assignedMaintenances);
+    }
+
 }
