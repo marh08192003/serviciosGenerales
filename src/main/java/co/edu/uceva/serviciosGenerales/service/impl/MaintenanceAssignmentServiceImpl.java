@@ -1,5 +1,6 @@
 package co.edu.uceva.serviciosGenerales.service.impl;
 
+import co.edu.uceva.serviciosGenerales.exception.DuplicateAssignmentException;
 import co.edu.uceva.serviciosGenerales.exception.ResourceNotFoundException;
 import co.edu.uceva.serviciosGenerales.persistence.entity.MaintenanceAssignmentEntity;
 import co.edu.uceva.serviciosGenerales.persistence.entity.MaintenanceEntity;
@@ -9,7 +10,6 @@ import co.edu.uceva.serviciosGenerales.persistence.repository.MaintenanceReposit
 import co.edu.uceva.serviciosGenerales.persistence.repository.UserRepository;
 import co.edu.uceva.serviciosGenerales.service.MaintenanceAssignmentService;
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceAssignmentDTO;
-import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceDTO;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,10 +44,17 @@ public class MaintenanceAssignmentServiceImpl implements MaintenanceAssignmentSe
     @Override
     public MaintenanceAssignmentDTO createMaintenanceAssignment(MaintenanceAssignmentDTO dto) {
         MaintenanceEntity maintenance = maintenanceRepository.findByIdAndActiveTrue(dto.getMaintenanceId())
-                .orElseThrow(() -> new ResourceNotFoundException(MAINTENANCE_NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new ResourceNotFoundException("El mantenimiento no está activo o no existe."));
 
         UserEntity user = userRepository.findByIdAndActiveTrue(dto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario no está activo o no existe."));
+
+        // Validar si ya existe una asignación activa
+        boolean exists = maintenanceAssignmentRepository
+                .existsByMaintenanceIdAndUserIdAndActiveTrue(dto.getMaintenanceId(), dto.getUserId());
+        if (exists) {
+            throw new DuplicateAssignmentException("El usuario ya está asignado a este mantenimiento.");
+        }
 
         MaintenanceAssignmentEntity entity = new MaintenanceAssignmentEntity();
         entity.setMaintenance(maintenance);
@@ -107,12 +114,6 @@ public class MaintenanceAssignmentServiceImpl implements MaintenanceAssignmentSe
         return assignments.stream()
                 .map(this::mapToDTO)
                 .toList();
-    }
-
-    @Override
-    public List<MaintenanceDTO> listMaintenancesAssignedToUser(Long userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listMaintenancesAssignedToUser'");
     }
 
 }

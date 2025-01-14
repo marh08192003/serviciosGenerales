@@ -1,7 +1,6 @@
 package co.edu.uceva.serviciosGenerales.service;
 
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceAssignmentDTO;
-import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceDTO;
 
 import java.util.List;
 
@@ -50,8 +49,6 @@ public interface MaintenanceAssignmentService {
      * @param id ID de la asignación a eliminar.
      */
     void deleteMaintenanceAssignment(Long id);
-
-    List<MaintenanceDTO> listMaintenancesAssignedToUser(Long userId);
 
     public List<MaintenanceAssignmentDTO> listAssignmentsForUser(Long userId);
 

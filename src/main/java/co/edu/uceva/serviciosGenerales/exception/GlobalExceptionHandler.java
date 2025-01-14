@@ -31,5 +31,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
+    @ExceptionHandler(DuplicateAssignmentException.class)
+    public ResponseEntity<String> handleDuplicateAssignmentException(DuplicateAssignmentException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
     // Aquí podrías manejar más excepciones, si lo deseas.
 }

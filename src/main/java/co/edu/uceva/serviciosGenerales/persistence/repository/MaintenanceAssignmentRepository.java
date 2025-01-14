@@ -43,5 +43,10 @@ public interface MaintenanceAssignmentRepository extends JpaRepository<Maintenan
 
     List<MaintenanceAssignmentEntity> findByUserIdAndActiveTrue(Long userId);
 
+    @Query("SELECT CASE WHEN COUNT(ma) > 0 THEN true ELSE false END " +
+            "FROM MaintenanceAssignmentEntity ma " +
+            "WHERE ma.maintenance.id = :maintenanceId AND ma.user.id = :userId AND ma.active = true")
+    boolean existsByMaintenanceIdAndUserIdAndActiveTrue(@Param("maintenanceId") Long maintenanceId,
+            @Param("userId") Long userId);
 
 }
