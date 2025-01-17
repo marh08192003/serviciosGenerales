@@ -28,6 +28,7 @@ public class MaintenanceAssignmentServiceImpl implements MaintenanceAssignmentSe
     private static final String ASSIGNMENT_NOT_FOUND_MESSAGE = "Asignación no encontrada";
     private static final String MAINTENANCE_NOT_FOUND_MESSAGE = "El mantenimiento no está activo o no existe";
     private static final String USER_NOT_FOUND_MESSAGE = "El usuario no está activo o no existe";
+    private static final String USER_ASSIGNED_MESSAGE = "El usuario ya está asignado a este mantenimiento.";
 
     private final MaintenanceAssignmentRepository maintenanceAssignmentRepository;
     private final MaintenanceRepository maintenanceRepository;
@@ -44,16 +45,16 @@ public class MaintenanceAssignmentServiceImpl implements MaintenanceAssignmentSe
     @Override
     public MaintenanceAssignmentDTO createMaintenanceAssignment(MaintenanceAssignmentDTO dto) {
         MaintenanceEntity maintenance = maintenanceRepository.findByIdAndActiveTrue(dto.getMaintenanceId())
-                .orElseThrow(() -> new ResourceNotFoundException("El mantenimiento no está activo o no existe."));
+                .orElseThrow(() -> new ResourceNotFoundException(MAINTENANCE_NOT_FOUND_MESSAGE));
 
         UserEntity user = userRepository.findByIdAndActiveTrue(dto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario no está activo o no existe."));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MESSAGE));
 
         // Validar si ya existe una asignación activa
         boolean exists = maintenanceAssignmentRepository
                 .existsByMaintenanceIdAndUserIdAndActiveTrue(dto.getMaintenanceId(), dto.getUserId());
         if (exists) {
-            throw new DuplicateAssignmentException("El usuario ya está asignado a este mantenimiento.");
+            throw new DuplicateAssignmentException(USER_ASSIGNED_MESSAGE);
         }
 
         MaintenanceAssignmentEntity entity = new MaintenanceAssignmentEntity();
