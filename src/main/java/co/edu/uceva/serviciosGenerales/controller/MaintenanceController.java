@@ -5,6 +5,8 @@ import co.edu.uceva.serviciosGenerales.service.MaintenanceService;
 import co.edu.uceva.serviciosGenerales.service.impl.JWTUtilityServiceImpl;
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceDTO;
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,10 +55,17 @@ public class MaintenanceController {
      * Lista todos los mantenimientos activos.
      */
     @GetMapping("/list")
-    public ResponseEntity<List<MaintenanceDTO>> listMaintenances(HttpServletRequest request)
+    public ResponseEntity<List<MaintenanceDTO>> listMaintenances(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            HttpServletRequest request)
             throws InvalidKeySpecException, NoSuchAlgorithmException, ParseException, JOSEException, IOException {
         validateRole(request, ROLE_SERVICIOS_GENERALES, ROLE_ADMIN);
-        List<MaintenanceDTO> maintenances = maintenanceService.listMaintenances();
+        Page<MaintenanceDTO> maintenancePage = maintenanceService.listMaintenances(page, size);
+
+        // Extraer solo el contenido
+        List<MaintenanceDTO> maintenances = maintenancePage.getContent();
+
         return ResponseEntity.ok(maintenances);
     }
 

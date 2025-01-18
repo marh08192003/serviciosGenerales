@@ -2,7 +2,7 @@ package co.edu.uceva.serviciosGenerales.service;
 
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceDTO;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 /**
  * Interface para el servicio de gestión de mantenimientos.
@@ -39,7 +39,7 @@ public interface MaintenanceService {
      * 
      * @return Lista de mantenimientos activos.
      */
-    List<MaintenanceDTO> listMaintenances();
+    Page<MaintenanceDTO> listMaintenances(int page, int size);
 
     /**
      * Realiza un soft delete de un mantenimiento cambiando su estado a inactivo.
@@ -47,4 +47,4 @@ public interface MaintenanceService {
      * @param id ID del mantenimiento a eliminar.
      */
     void deleteMaintenance(Long id);
-} 
+}

@@ -9,8 +9,14 @@ import co.edu.uceva.serviciosGenerales.persistence.repository.MaintenanceReposit
 import co.edu.uceva.serviciosGenerales.persistence.repository.PhysicalAreaRepository;
 import co.edu.uceva.serviciosGenerales.service.MaintenanceService;
 import co.edu.uceva.serviciosGenerales.service.model.dto.MaintenanceDTO;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
+
+
 
 import java.util.List;
 
@@ -72,9 +78,12 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     }
 
     @Override
-    public List<MaintenanceDTO> listMaintenances() {
-        List<MaintenanceEntity> entities = maintenanceRepository.findByActiveTrue();
-        return entities.stream().map(this::mapToDTO).toList();
+    public Page<MaintenanceDTO> listMaintenances(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MaintenanceEntity> maintenancePage = maintenanceRepository.findByActiveTrue(pageable);
+
+        // Convertir las entidades a DTOs
+        return maintenancePage.map(this::mapToDTO);
     }
 
     @Override
