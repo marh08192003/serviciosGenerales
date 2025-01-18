@@ -22,8 +22,10 @@ public class UserController {
 
     // Obtener lista de usuarios
     @GetMapping("/list")
-    public ResponseEntity<List<UserDTO>> listUsers() {
-        List<UserDTO> users = userService.listUsers();
+    public ResponseEntity<List<UserDTO>> listUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        List<UserDTO> users = userService.listUsers(page, size);
         return ResponseEntity.ok(users);
     }
 

@@ -1,16 +1,17 @@
 package co.edu.uceva.serviciosGenerales.service.impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import co.edu.uceva.serviciosGenerales.exception.UserAlreadyInactiveException;
 import co.edu.uceva.serviciosGenerales.exception.UserNotFoundException;
 import co.edu.uceva.serviciosGenerales.persistence.entity.UserEntity;
 import co.edu.uceva.serviciosGenerales.persistence.repository.UserRepository;
 import co.edu.uceva.serviciosGenerales.service.UserService;
 import co.edu.uceva.serviciosGenerales.service.model.dto.UserDTO;
-
 import java.util.List;
 
 @Service
@@ -69,9 +70,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> listUsers() {
-        List<UserEntity> users = userRepository.findByActiveTrue(); // Filtrar solo usuarios activos
-        return users.stream()
+    public List<UserDTO> listUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size); // Configurar la paginación
+        Page<UserEntity> userPage = userRepository.findByActiveTrue(pageable); // Llamar al repositorio con paginación
+
+        // Convertir entidades a DTOs
+        return userPage.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
     }

@@ -24,11 +24,10 @@ public interface UserService {
      * Lists all users (active and inactive).
      * If you want only active users, you could create another method.
      */
-    List<UserDTO> listUsers();
+    List<UserDTO> listUsers(int page, int size);
 
     /**
      * Deactivates (soft delete) a user by setting its 'active' attribute to false.
      */
     void deleteUser(Long id);
 }
- 

@@ -1,29 +1,27 @@
 package co.edu.uceva.serviciosGenerales.persistence.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
 import co.edu.uceva.serviciosGenerales.persistence.entity.UserEntity;
-
 import java.util.Optional;
-import java.util.List;
 
-/**
- * Repository interface for UserEntity. Provides custom methods for retrieving
- * non-deleted users. 
- */
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     /**
-     * Returns all users where 'active' is true (non-deleted users).
+     * Devuelve todos los usuarios activos (active = true).
      */
-    List<UserEntity> findByActiveTrue();
+    Page<UserEntity> findByActiveTrue(Pageable pageable);
 
     /**
-     * Returns a user with the given ID, as long as 'active' is true.
+     * Encuentra un usuario activo por ID.
      */
     Optional<UserEntity> findByIdAndActiveTrue(Long id);
 
+    /**
+     * Encuentra un usuario activo por correo electrónico institucional.
+     */
     @Query(value = "SELECT * FROM user WHERE active = true AND institutional_email = :email", nativeQuery = true)
     Optional<UserEntity> findByEmail(String email);
 }
