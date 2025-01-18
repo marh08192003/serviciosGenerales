@@ -5,6 +5,8 @@ import co.edu.uceva.serviciosGenerales.service.impl.JWTUtilityServiceImpl;
 import co.edu.uceva.serviciosGenerales.service.model.dto.IncidentDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -76,7 +78,10 @@ public class IncidentController {
     // Listar todas las incidencias (solo para servicios generales y
     // administradores)
     @GetMapping("/list")
-    public ResponseEntity<List<IncidentDTO>> listAllIncidents(HttpServletRequest request) throws Exception {
+    public ResponseEntity<List<IncidentDTO>> listAllIncidents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            HttpServletRequest request) throws Exception {
         String token = request.getHeader("Authorization").substring(7);
         String userRole = jwtUtilityService.extractRoleFromJWT(token);
 
@@ -85,7 +90,10 @@ public class IncidentController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        List<IncidentDTO> incidents = incidentService.listActiveIncidents();
+        // Obtener la página de incidentes
+        Page<IncidentDTO> incidentsPage = incidentService.listActiveIncidents(page, size);
+        List<IncidentDTO> incidents = incidentsPage.getContent();
+
         return ResponseEntity.ok(incidents);
     }
 

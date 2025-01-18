@@ -10,8 +10,14 @@ import co.edu.uceva.serviciosGenerales.persistence.repository.IncidentRepository
 import co.edu.uceva.serviciosGenerales.persistence.repository.UserRepository;
 import co.edu.uceva.serviciosGenerales.service.IncidentService;
 import co.edu.uceva.serviciosGenerales.service.model.dto.IncidentDTO;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.List;
 
@@ -87,10 +93,15 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    public List<IncidentDTO> listActiveIncidents() {
-        return incidentRepository.findByActiveTrue().stream()
-                .map(this::mapToDTO)
-                .toList();
+    public Page<IncidentDTO> listActiveIncidents(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size); /* Pageable cannot be resolved to a typeJava(16777218)
+        👉 Resolve unknown type */
+
+        // Consultar incidentes activos con paginación
+        Page<IncidentEntity> incidentsPage = incidentRepository.findByActiveTrue(pageable);
+
+        // Convertir las entidades a DTOs y devolver la página
+        return incidentsPage.map(this::mapToDTO);
     }
 
     @Override

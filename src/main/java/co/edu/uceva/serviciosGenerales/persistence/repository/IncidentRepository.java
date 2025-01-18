@@ -1,6 +1,9 @@
 package co.edu.uceva.serviciosGenerales.persistence.repository;
 
 import co.edu.uceva.serviciosGenerales.persistence.entity.IncidentEntity;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,7 +19,7 @@ public interface IncidentRepository extends JpaRepository<IncidentEntity, Long> 
      * 
      * @return Lista de incidencias activas.
      */
-    List<IncidentEntity> findByActiveTrue();
+    Page<IncidentEntity> findByActiveTrue(Pageable pageable);
 
     /**
      * Encuentra todas las incidencias activas reportadas por un usuario específico.

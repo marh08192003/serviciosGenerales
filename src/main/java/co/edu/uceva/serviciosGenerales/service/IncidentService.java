@@ -4,6 +4,8 @@ import co.edu.uceva.serviciosGenerales.service.model.dto.IncidentDTO;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 /**
  * Interface para el servicio de gestión de incidencias.
  * Define las operaciones principales relacionadas con las incidencias.
@@ -40,8 +42,7 @@ public interface IncidentService {
      * 
      * @return Lista de incidencias activas como DTOs.
      */
-    List<IncidentDTO> listActiveIncidents();
-
+    Page<IncidentDTO> listActiveIncidents(int page, int size);
     /**
      * Elimina (soft delete) una incidencia cambiando su estado a inactivo.
      * 
