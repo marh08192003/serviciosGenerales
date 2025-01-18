@@ -1,8 +1,9 @@
 package co.edu.uceva.serviciosGenerales.persistence.repository;
 
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import co.edu.uceva.serviciosGenerales.persistence.entity.PhysicalAreaEntity;
@@ -18,7 +19,7 @@ public interface PhysicalAreaRepository extends JpaRepository<PhysicalAreaEntity
      * 
      * @return Lista de entidades PhysicalAreaEntity activas.
      */
-    List<PhysicalAreaEntity> findAllByActiveTrue();
+    Page<PhysicalAreaEntity> findAllByActiveTrue(Pageable pageable);
 
     /**
      * Encuentra un área física por su ID y que esté activa.

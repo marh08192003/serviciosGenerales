@@ -1,7 +1,8 @@
 package co.edu.uceva.serviciosGenerales.service;
 
 import co.edu.uceva.serviciosGenerales.service.model.dto.PhysicalAreaDTO;
-import java.util.List;
+
+import org.springframework.data.domain.Page;
 
 /**
  * Interface for the Physical Area Service.
@@ -40,7 +41,7 @@ public interface PhysicalAreaService {
      * 
      * @return A list of active physical areas as DTOs.
      */
-    List<PhysicalAreaDTO> listActivePhysicalAreas();
+    Page<PhysicalAreaDTO> listActivePhysicalAreas(int page, int size);
 
     /**
      * Soft deletes a physical area by setting its 'active' attribute to false.

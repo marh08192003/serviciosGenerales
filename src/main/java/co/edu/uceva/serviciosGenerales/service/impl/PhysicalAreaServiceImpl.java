@@ -6,10 +6,14 @@ import co.edu.uceva.serviciosGenerales.persistence.entity.PhysicalAreaEntity;
 import co.edu.uceva.serviciosGenerales.persistence.repository.PhysicalAreaRepository;
 import co.edu.uceva.serviciosGenerales.service.PhysicalAreaService;
 import co.edu.uceva.serviciosGenerales.service.model.dto.PhysicalAreaDTO;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 /**
  * Implementation of the PhysicalAreaService interface.
@@ -57,11 +61,10 @@ public class PhysicalAreaServiceImpl implements PhysicalAreaService {
     }
 
     @Override
-    public List<PhysicalAreaDTO> listActivePhysicalAreas() {
-        List<PhysicalAreaEntity> activeAreas = physicalAreaRepository.findAllByActiveTrue();
-        return activeAreas.stream()
-                .map(this::mapToDTO)
-                .toList();
+    public Page<PhysicalAreaDTO> listActivePhysicalAreas(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PhysicalAreaEntity> physicalAreaPage = physicalAreaRepository.findAllByActiveTrue(pageable);
+        return physicalAreaPage.map(this::mapToDTO);
     }
 
     @Override

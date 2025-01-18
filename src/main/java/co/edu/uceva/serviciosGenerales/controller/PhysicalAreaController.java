@@ -6,6 +6,8 @@ import co.edu.uceva.serviciosGenerales.service.impl.JWTUtilityServiceImpl;
 import co.edu.uceva.serviciosGenerales.service.model.dto.PhysicalAreaDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -65,9 +67,11 @@ public class PhysicalAreaController {
      * @return A list of active physical areas.
      */
     @GetMapping("/list")
-    public ResponseEntity<List<PhysicalAreaDTO>> listPhysicalAreas() {
-        List<PhysicalAreaDTO> physicalAreas = physicalAreaService.listActivePhysicalAreas();
-        return ResponseEntity.ok(physicalAreas);
+    public ResponseEntity<List<PhysicalAreaDTO>> listPhysicalAreas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        Page<PhysicalAreaDTO> physicalAreas = physicalAreaService.listActivePhysicalAreas(page, size);
+        return ResponseEntity.ok(physicalAreas.getContent());
     }
 
     /**
